@@ -1,3 +1,0 @@
-"DETERMINING_CONDITION","SNMP_USER","SNMP_ROLE","PASS_AUTH","PASS_PRIV","SNMP_USER_ACL"
-"READuser","SNMP_Read_Username","READOnlygroup","SNMP_READ_Auth_Password","SNMP_READ_Priv_Password","SNMP_ReadOnly_ACL"
-"WRITEuser","SNMP_Write_Username","WRITEgroup","SNMP_WRITE_Auth_Password","SNMP_WRITE_Priv_Password","SNMP_Write_ACL"
