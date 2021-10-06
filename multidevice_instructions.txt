@@ -1,0 +1,175 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>> START OF INSTRUCTIONS <<<<<<<<<<<<<<<<<<<<<<<<<<<
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+#################################
+##           README            ##
+##                             ##
+## Your Multi-Device CSV File: ##
+#################################
+
+FORMAT REQUIREMENTS:
+ + must contain data for 2 or more devices.
+ + must contain a value for EVERY column listed below.
+ + must NOT contain any column headers.
+ + must NOT have any spaces between the double quotes and commas.
+ + must NOT have any whitespace before the first, or after the last, quoted value in each line.
+ + must NOT have any empty lines/spaces before the first line, or after the last line, of field values.
+ + must NOT add or remove any fields from the 30 fields shown below.
+ + must use a single comma to separate the values.
+ + must use double quotes to wrap any value that contains a comma. (Values in csv files are separated by commas, using double quotes to encapsulate values that contain commas themselves prevents errors when parsing for values.
+ + Notice in the section below titled 'Field Options', some Fields are denoted with: [Choose one]. The option you select must MATCH EXACTLY to one of the available options. Values ARE CASE-SENSITIVE.
+
+FIELD OPTION VALUES:
+ + Each comma-separated value represents a data entry for its corresponding FIELD. 
+    i.e.  The following represents the first 3 values for a row of device data: "OOB","Switch_Nexus","DC-CORE-SW1"
+          "DC-CORE-SW1" would be associated to the variable 'devName'.
+
+HINTS - HOW TO GENERATE A MULTI-DEVICE CSV FILE:
+ + Create your file in notepad, and save it with a .csv filetype extension(NOT the default of .txt).
+ + View the sample data from an example csv file at the bottom of these instructions if you have any questions.
+
+
+
+
+#######################################
+## LIST OF REQUIRED FIELDS(COLUMNS): ##
+#######################################
+
+[networkType]       [deviceType]      [devName]         [mgmt_ipaddr]       [mgmt_interf]       [vrf_exists]
+[vrf_name]          [geo_region]      [ise_region]      [aaaServer_PRI]     [aaaServer_SEC]     [ntpServer_Prefer]
+[ntpServer_SEC]     [ntpServer_TER]   [ntpServer_ALT]   [snmp_loc]          [snmp_contact]      [snmp_contact_phone]
+[site_password]     [loggingSyntax]   [snmp_READuser]   [snmp_READrole]     [snmp_READauthPW]   [snmp_READprivPW]
+[snmp_READuserACL]  [snmp_WRITEuser]  [snmp_WRITErole]  [snmp_WRITEauthPW]  [snmp_WRITEprivPW]  [snmp_WRITEuserACL]
+
+
+
+
+####################
+## FIELD OPTIONS: ##
+####################
+
+networkType
+    +The name of the primary network managed by the device.
+    [Choose One]
+    UNDERLAY | UNDERLAYv2 | OVERLAY | DATACENTER_DC | COMMERCIAL | OOB
+
+deviceType
+    +The device category.
+    [Choose One]
+    ASA_Traditional | ASA_Firepower_21xx | ASA_Firepower_41xx | Router | Switch_Nexus | Switch_NON_NEXUS | OTHER
+
+devName
+    +The device hostname.
+
+mgmt_ipaddr
+    +The management IP address in the format of: x.x.x.x
+
+mgmt_interf
+    +The name of the management interface. (NOTE: Must have space between interface name and interface ID. i.e. loopback 0 instead of loopback0)
+
+vrf_exists
+    +Is the management interface participating in VRF?
+    [Choose One]
+    yes | no
+
+vrf_name
+    +The name of the vrf. If not participating in VRF, enter: no_vrf  (NOTE: Capitalization-sensitive! mgmt-vrf is not the same as Mgmt-vrf)
+
+geo_region
+    +The geographical region the device resides in.
+    [Choose One]
+    REGION_A | REGION_B | REGION_C | REGION_D
+
+ise_region   
+    +The Geographical region of the TACACS servers you want to service the device. Most times, this will share the same value as geo_region.
+    [Choose one]
+    REGION_A | REGION_B | REGION_C | REGION_D
+
+aaaServer_PRI
+    +The IP Address of the primary TACACS Server in the format of: x.x.x.x
+
+aaaServer_SEC
+    +The IP Address of the secondary TACACS Server in the format of: x.x.x.x
+
+ntpServer_Prefer
+    +The IP Address of the primary NTP Server in the format of: x.x.x.x
+
+ntpServer_SEC
+    +The IP Address of the secondary NTP Server in the format of: x.x.x.x
+
+ntpServer_TER
+    +The IP Address of the tertiary NTP Server in the format of: x.x.x.x
+
+ntpServer_ALT
+    +The IP Address of the quaternary NTP Server in the format of: x.x.x.x
+
+snmp_loc
+    +The SNMP Location of the device.
+
+snmp_contact
+    +The name of the Network Department managing the device. (NOTE: Your entry MUST include the case-sensitive words: Network Department)
+
+snmp_contact_phone
+    +The FULL 10-digit phone number belonging to the Network Department/POC managing the device. Format: xxx-xxx-xxxx
+
+site_password
+    +The password to the username that is configured locally on the device.
+
+loggingSyntax
+    +The full command used to direct syslog messages over a specific port to a syslog host. You are limited to assigning only one entry to this Field Option, See the csv example at the bottom of these instructions to see yet another example.
+    +EXAMPLES_IOS:       logging host [syslog_server_ip] transport udp port [port_number]]
+    +EXAMPLES_IOS_VRF:   logging host [syslog_server_ip] vrf [vrf_name] transport udp port [port_number]]
+    +EXAMPLES_NEXUS:     logging server [syslog_server_ip] [severity_level] port [port_number]
+    +EXAMPLES_NEXUS_VRF: logging server [syslog_server_ip] [severity_level] port [port_number]] use-vrf [vrf_name]
+
+snmp_READuser
+    +The name of the read-only snmp user.
+
+snmp_READrole
+    +The group(IOS/ASA) or role(Nexus) that the read-only user is associated with. 
+    +If device runs IOS/IOS-XE, supply your own read-only SNMP group name.
+    +If device runs ASA, supply your own read-only SNMP group name.
+    +If device runs NX-OS, you MUST choose from one of the following options: vdc-operator | network-operator
+
+snmp_READauthPW
+    +The authentication authentication SHA digest for the read-only snmp user.
+
+snmp_READprivPW
+    +The privacy AES encrypted password for the read-only snmp user.
+
+snmp_READuserACL
+    +The access control list managing access for read-only snmp users.
+
+snmp_WRITEuser
+    +Name of the write-enabled snmp user.
+
+snmp_WRITErole
+    +The group(IOS/ASA) or role(Nexus) that the write-enabled user is associated with. 
+    +If device runs IOS/IOS-XE, supply your own write-enabled SNMP group name.
+    +If device runs ASA, supply your own write-enabled SNMP group name.
+    +If device runs NX-OS, you MUST choose from one of the following options: vdc-admin | network-admin
+
+snmp_WRITEauthPW
+    +The authentication authentication SHA digest for the write-enabled snmp user.
+
+snmp_WRITEprivPW
+    +The privacy AES encrypted password for the write-enabled snmp user.
+
+snmp_WRITEuserACL
+    +The access control list managing access for write-enabled snmp users.
+
+
+
+
+####################################
+## CONTENTS FROM AN EXAMPLE FILE: ##
+####################################
+
+"UNDERLAY","Router","CE-Router-1","1.1.1.1","loopback 0","no","no_vrf","REGION_A","REGION_A","1.2.3.4","2.3.4.5","3.4.5.6","4.5.6.7","5.6.7.8","6.7.8.9","snmp-server location Site_ID, CITY_A, STATE","HQ Network Department","800-123-4567","super_password","logging host 192.168.0.1 transport udp port 12345","I_CAN_READ","READOnlygroup","I_CAN_READ-AuthPassword","I_CAN_READ-PrivPassword","75","I_CAN_WRITE","WRITEgroup","I_CAN_WRITE-AuthPassword","I_CAN_WRITE-PrivPassword","70"
+"OVERLAY","Switch_NON_NEXUS","LAN-Switch-2","2.2.2.2","vlan 2","yes","management","REGION_B","REGION_B","1.2.3.4","2.3.4.5","3.4.5.6","4.5.6.7","5.6.7.8","6.7.8.9","snmp-server location Site_ID, CITY_B, STATE","BRANCH_A Network Department","800-234-5678","branch_password","logging host 192.168.0.1 vrf management transport udp port 12345","I_CAN_READ","READOnlygroup","I_CAN_READ-AuthPassword","I_CAN_READ-PrivPassword","75","I_CAN_WRITE","WRITEgroup","I_CAN_WRITE-AuthPassword","I_CAN_WRITE-PrivPassword","70"
+"DATACENTER_DC","Switch_Nexus","DC-AGG-Switch-1","3.3.3.3","vlan 22","yes","Management","REGION_A","REGION_A","1.2.3.4","2.3.4.5","3.4.5.6","4.5.6.7","5.6.7.8","6.7.8.9","snmp-server location Site_ID, CITY_A, STATE","HQ Network Department","800-123-4567","super_password","logging server 192.168.0.1 6 port 12345 use-vrf Management","I_CAN_READ","READOnlygroup","I_CAN_READ-AuthPassword","I_CAN_READ-PrivPassword","75","I_CAN_WRITE","WRITEgroup","I_CAN_WRITE-AuthPassword","I_CAN_WRITE-PrivPassword","70"
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF INSTRUCTIONS <<<<<<<<<<<<<<<<<<<<<<<<<<<<
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

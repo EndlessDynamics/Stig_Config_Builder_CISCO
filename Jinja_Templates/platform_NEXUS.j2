@@ -1,0 +1,280 @@
+{#
+#############################
+SECTION_1: DOMAIN INFORMATION
+#############################
+#}
+ip domain-name [ReplaceThisValueWith:CORPORATE_DOMAIN_NAME]
+!
+{#
+##############################
+SECTION_2: LOCAL USER DATABASE
+##############################
+#}
+no username cisco
+no username webadmin
+username [ReplaceThisValueWith:MGMT_USERNAME] password [ReplaceThisValueWith:LOCAL_SITE_PASSWORD] role network-admin
+!
+{#
+######################################
+SECTION_3: DEVICE ACCESS CONFIGURATION
+######################################
+#}
+line aux 0
+exec-timeout 10
+!
+line console
+exec-timeout 10
+!
+line vty
+exec-timeout 10
+session-limit 5
+!
+{#
+##########################################################################
+SECTION_4: PREVENT DEVICE LOCKOUT (TEMPORARILY WHILE CONFIG GETS APPLIED)
+##########################################################################
+#}
+aaa authentication login console local none
+aaa authentication login default local none
+aaa authorization config-commands default local none
+aaa authorization commands default local none
+line vty
+no login authentication
+!
+{#
+##########################################
+SECTION_5: DISABLE UNWANTED NEXUS FEATURES
+##########################################
+#}
+no feature telnet
+!
+{#
+#################################
+SECTION_6: GENERIC CONFIGURATIONS
+#################################
+#}
+ip tcp synwait-time 10
+no ip source-route
+clock timezone GMT 0 0
+no clock summer-time
+no ip domain-lookup
+!
+cli alias name wr copy run start
+no ip source-route
+!
+{#
+#################################
+SECTION_7: BASE NTP CONFIGURATION
+#################################
+#}
+feature ntp
+clock protocol ntp
+ntp distribute
+!
+{% if vrf_check == "yes" -%}
+ntp server {{ NTP_1 }} prefer use-vrf {{ vrf_name }} key 1
+ntp server {{ NTP_2 }} use-vrf {{ vrf_name }} key 1
+ntp server {{ NTP_3 }} use-vrf {{ vrf_name }} key 1
+ntp server {{ NTP_4 }} use-vrf {{ vrf_name }} key 1
+ntp source-interface {{ mgmt_Int }} use-vrf {{ vrf_name }}
+!
+{% elif vrf_check == "no" -%}
+ntp server {{ NTP_1 }} prefer key 1
+ntp server {{ NTP_2 }} key 1
+ntp server {{ NTP_3 }} key 1
+ntp server {{ NTP_4 }} key 1
+ntp source-interface {{ mgmt_Int }}
+!
+{% endif -%}
+ntp authenticate
+ntp authentication-key 1 md5 [ReplaceThisValueWith:NTP_PASSWORD]
+ntp trusted-key 1
+ntp distribute
+ntp commit
+!
+{#
+#########################
+SECTION_8: SYSTEM BANNERS
+#########################
+#}
+no banner motd
+banner motd ^
+[ReplaceThisValueWith:MOTD_BANNER_MESSAGE]
+^
+!
+{#
+###############################
+SECTION_9: SNMPv3 CONFIGURATION
+###############################
+#}
+snmp-server packetsize 1400
+snmp-server contact {{ snmp_contact }} (Phone: {{ snmp_contact_phone }})
+snmp-server globalEnforcePriv
+snmp-server user all network-operator
+no snmp-server user {{ snmp_READuser }}
+no snmp-server user {{ snmp_WRITEuser }}
+{{ snmp_location }}
+!
+{#
+#################################
+SECTION_10: SNMPv3 USER MANAGEMENT
+#################################
+#}
+snmp-server user {{ snmp_READuser }} {{ snmp_READrole }} auth sha {{ snmp_READauthPW }} priv aes-128 {{ snmp_READprivPW }}
+snmp-server user {{ snmp_READuser }} use-ipv4acl {{ snmp_READuserACL }}
+!
+snmp-server user {{ snmp_WRITEuser }} {{ snmp_WRITErole }} auth sha {{ snmp_WRITEauthPW }} priv aes-128 {{ snmp_WRITEprivPW }}
+snmp-server user {{ snmp_WRITEuser }} use-ipv4acl {{ snmp_WRITEuserACL }}
+!
+{#
+######################################
+SECTION_11: BASE LOGGING CONFIGURATION
+######################################
+#}
+no logging console
+no logging monitor
+logging logfile crit_log 2
+logging level pltfm_config 4
+logging level local6 6
+logging timestamp milliseconds
+logging level aaa 5
+logging level tacacs 5
+!
+{#
+#################################################
+SECTION_12: SNMP USER ACCESS CONFIGURATION - ACLs
+#################################################
+#}
+resequence ip access-list {{ snmp_READuserACL }} 50 10
+ip access-list {{ snmp_READuserACL }}
+statistics per-entry
+remark SNMP [ReplaceThisValueWith:SNMP_READ_ONLY_GROUP_NAME] access
+1 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any
+2 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any
+3 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any
+4 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any
+5 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any
+resequence ip access-list {{ snmp_READuserACL }} 10 10
+!
+resequence ip access-list {{ snmp_WRITEuserACL }} 50 10
+ip access-list {{ snmp_WRITEuserACL }}
+statistics per-entry
+remark SNMP [ReplaceThisValueWith:SNMP_WRITE_GROUP_NAME] access
+1 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any log
+2 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any log
+3 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any log
+4 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any log
+5 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any log
+resequence ip access-list {{ snmp_WRITEuserACL }} 10 10
+!
+{#
+####################################
+SECTION_13: REMOTE ACCESS MANAGEMENT
+####################################
+#}
+resequence ip access-list [ReplaceThisValueWith:VTY_ACL] 50 10
+ip access-list [ReplaceThisValueWith:VTY_ACL]
+statistics per-entry
+remark VTY Access
+1 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any log
+2 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any log
+3 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any log
+4 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any log
+5 permit ip [ReplaceThisValueWith:x.x.x.x]/32 any log
+!
+resequence ip access-list [ReplaceThisValueWith:VTY_ACL] 10 10
+!
+{#
+################################
+SECTION_14: SYSLOG CONFIGURATION
+################################
+#}
+{% if vrf_check == "yes" -%}
+logging server [ReplaceThisValueWith:x.x.x.x] 6 use-vrf {{ vrf_name }} facility local6
+logging server [ReplaceThisValueWith:x.x.x.x] 6 use-vrf {{ vrf_name }} facility local6
+logging server [ReplaceThisValueWith:x.x.x.x] 6 use-vrf {{ vrf_name }} facility local6
+logging server [ReplaceThisValueWith:x.x.x.x] 6 use-vrf {{ vrf_name }} facility local6
+logging server [ReplaceThisValueWith:x.x.x.x] 6 use-vrf {{ vrf_name }} facility local6
+!
+{{ syslogSyntax }}
+!
+{% elif vrf_check == "no" -%}
+logging server [ReplaceThisValueWith:x.x.x.x] 6 facility local6
+logging server [ReplaceThisValueWith:x.x.x.x] 6 facility local6
+logging server [ReplaceThisValueWith:x.x.x.x] 6 facility local6
+logging server [ReplaceThisValueWith:x.x.x.x] 6 facility local6
+logging server [ReplaceThisValueWith:x.x.x.x] 6 facility local6
+!
+{{ syslogSyntax }}
+{% endif -%}
+!
+{#
+################################################################################
+SECTION_15: REMOVE DEPRECATED SYNTAX AND PREPARE FOR REQ'D TACACS CONFIGURATIONS
+################################################################################
+#}
+aaa group server tacacs+ [ReplaceThisValueWith:TACACS_GROUP_NAME]
+no server {{ AAA_PRI }}
+no server {{ AAA_SEC }}
+!
+no tacacs-server host {{ AAA_PRI }}
+no tacacs-server host {{ AAA_SEC }}
+!
+{#
+################################
+SECTION_16: TACACS CONFIGURATION
+################################
+#}
+feature tacacs+
+aaa new-model
+!
+ip tacacs source-interface {{ mgmt_Int }}
+tacacs-server host {{ AAA_PRI }} key [ReplaceThisValueWith:SHARED_SECRET_PASSWORD] single-connection
+tacacs-server host {{ AAA_SEC }} key [ReplaceThisValueWith:SHARED_SECRET_PASSWORD] single-connection
+!
+aaa group server tacacs+ [ReplaceThisValueWith:TACACS_GROUP_NAME]
+server {{ AAA_PRI }}
+server {{ AAA_SEC }}
+!
+{#
+#################################
+SECTION_17: NetFlow CONFIGURATION
+#################################
+#}
+feature netflow
+!
+flow exporter [ReplaceThisValueWith:EXPORT_NAME]
+description [ReplaceThisValueWith:EXPORTER_DESCRIPTION]
+!
+{% if vrf_check == "yes" -%}
+destination [ReplaceThisValueWith:NETFLOW_SERVER_IP] use-vrf {{ vrf_name }}
+!
+{% elif vrf_check == "no" -%}
+destination [ReplaceThisValueWith:NETFLOW_SERVER_IP]
+!
+{% endif -%}
+source {{ mgmt_Int }}
+transport udp [ReplaceThisValueWith:PORT_ID]
+!
+flow monitor [ReplaceThisValueWith:MONITOR_NAME]
+description [ReplaceThisValueWith:MONITOR_DESCRIPTION]
+exporter [ReplaceThisValueWith:EXPORT_NAME]
+record netflow ipv4 original-input
+{#
+#############################
+SECTION_18: AAA CONFIGURATION
+#############################
+#}
+line vty
+access-class [ReplaceThisValueWith:VTY_ACL] in
+no tacacs-server directed-request
+!
+aaa accounting default group [ReplaceThisValueWith:TACACS_GROUP_NAME]
+!
+aaa authentication login default group [ReplaceThisValueWith:TACACS_GROUP_NAME] local
+aaa authentication login console group [ReplaceThisValueWith:TACACS_GROUP_NAME] local
+aaa authentication login error-enable
+!
+aaa authorization commands default group [ReplaceThisValueWith:TACACS_GROUP_NAME] local
+aaa authorization config-commands default group [ReplaceThisValueWith:TACACS_GROUP_NAME] local
+!
