@@ -1,0 +1,5 @@
+"DETERMINING_CONDITION","SNMP_USER","SNMP_ROLE","PASS_AUTH","PASS_PRIV","SNMP_USER_ACL"
+"READuser","SNMP_Read_Username","vdc-operator","SNMP_READ_Auth_Password","SNMP_READ_Priv_Password","SNMP_ReadOnly_ACL"
+"READuser_admin","SNMP_Read_Username","network-operator","SNMP_READ_Auth_Password","SNMP_READ_Priv_Password","SNMP_ReadOnly_ACL"
+"WRITEuser","SNMP_Write_Username","vdc-admin","SNMP_WRITE_Auth_Password","SNMP_WRITE_Priv_Password","SNMP_Write_ACL"
+"WRITEuser_admin","SNMP_Write_Username","network-admin","SNMP_WRITE_Auth_Password","SNMP_WRITE_Priv_Password","SNMP_Write_ACL"
